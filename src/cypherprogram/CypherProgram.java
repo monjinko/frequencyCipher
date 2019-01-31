@@ -10,7 +10,7 @@ package cypherprogram;
  * @author Jinho
  *
  */
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.io.FileReader;
@@ -19,35 +19,25 @@ import java.io.IOException;
 
 public class CypherProgram {
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) throws IOException {
+    public char[] tble2 = new char[]{'A', 'B', 'C', 'D', 'E', 'F',
+        'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q',
+        'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
 
-        char[] tble2 = new char[]{'A', 'B', 'C', 'D', 'E', 'F',
-            'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q',
-            'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
-        char[] tble = new char[]{'Z', 'J', 'Q', 'X', 'K', 'V',
-            'B', 'P', 'G', 'W', 'Y', 'F', 'M', 'C', 'U', 'L', 'D',
-            'H', 'R', 'S', 'N', 'I', 'O', 'A', 'T', 'E'};
+    public int[] freq = new int[26];
+    public int[] sorted = new int[26]; //sorted 
+    public char[] freqT = new char[26];
 
-        int[] freq = new int[26];
-        int[] sorted = new int[26];
-        char[] freqT = new char[26];
+    public CypherProgram() {
 
-        FileReader fIn = new FileReader("shakespeare_cipher.txt");
-        BufferedReader br = new BufferedReader(fIn);
-        String line = null;
-        StringBuilder sb = new StringBuilder();
-        while ((line = br.readLine()) != null) {
-            sb.append(line);
-            sb.append("\n");
-        }
+    }
 
-        String text = sb.toString();
-        int tLength = text.length();
-        freqCounter(text, freq);
-        detectDup(freq);
+    public char [] calibTable(String cTable) {
+
+        int tLength = cTable.length();
+        freqCounter(cTable, freq); // count number of each letter appearance
+        detectDup(freq); // get rid of duplicate
+        //Sorting 
+        
         System.arraycopy(freq, 0, sorted, 0, freq.length);
         QS ob = new QS();
         ob.sort(sorted, 0, freq.length - 1);
@@ -61,52 +51,49 @@ public class CypherProgram {
                 }
             }
         }
-        char[] s1 = text.toCharArray();
+        return freqT;
 
-        System.out.println();
-        System.out.println("Frequency of Letters Unsorted");
-        for (int i = 0; i < freq.length; i++) {
-            System.out.print(tble2[i] + ":" + freq[i] + " ");
+    }
+
+    //Read from txt file
+    public String cypher(String text, char [] tble1) {
+
+        int tLength = text.length();
+        freqCounter(text, freq); // count number of each letter appearance
+        detectDup(freq); // get rid of duplicate
+        //Sorting 
+        System.arraycopy(freq, 0, sorted, 0, freq.length);
+        QS ob = new QS();
+        ob.sort(sorted, 0, freq.length - 1);
+
+        //maps frequency to actual alphabet
+        for (int i = 0; i < 26; i++) {
+
+            for (int j = 0; j < 26; j++) {
+                if (freq[i] == sorted[j]) {
+
+                    freqT[j] = tble2[i]; //places char in order of incr. freq.                   
+                }
+            }
         }
-        System.out.println();
 
-        System.out.println("Freq UnOrdered but Increasing freq. Alpha.");
-        for (int i = 0; i < freqT.length; i++) {
-            System.out.print(freqT[i] + ":" + sorted[i] + " ");
-        }
-        System.out.println();
-
-        System.out.println("Frequency of Letters Sorted");
-        for (int i = 0; i < freq.length; i++) {
-            System.out.print(tble[i] + ":" + sorted[i] + " ");
-        }
-        System.out.println();
-        System.out.println();
-
-        char[] temp = matchAlpha(freqT, tble2, tble);
-
-        System.out.println("Freq Ordered Alpha.");
-        for (int i = 0; i < freq.length; i++) {
-            System.out.print(tble2[i]);
-        }
-        System.out.println();
-        for (int i = 0; i < freqT.length; i++) {
-            System.out.print(temp[i]);
-        }
-        System.out.println();
-
-        finalCipher(s1, temp, tLength);
-
-        System.out.println();
-        System.out.println("Final Text");
-        for (int i = 0; i < s1.length; i++) {
-            System.out.print(s1[i]);
-        }
+        char[] s1 = text.toCharArray(); //text file into char array
         
-        System.out.println();
-        System.out.println();
-        System.out.println("------------------------------");
-        System.out.println("DO YOU WANT TO GUESS A LETTER?");
+        char[] temp = matchAlpha(freqT, tble2, tble1);
+        
+        for(int i = 0; i < temp.length; i++)System.out.print(temp[i]); 
+        
+        char[] cypherText = finalCipher(s1, temp, tLength);
+        
+        return String.valueOf(cypherText);
+    }
+
+    public void guess(char[] s1, char[] temp, String text, int tLength) {
+
+//        System.out.println();
+//        System.out.println();
+//        System.out.println("------------------------------");
+//        System.out.println("DO YOU WANT TO GUESS A LETTER?");
         Scanner scanner = new Scanner(System.in);
         String command = scanner.nextLine();
 
@@ -141,7 +128,10 @@ public class CypherProgram {
 
     }
 
-    public static void freqCounter(String text, int[] freq) {
+    public void freqCounter(String text1, int[] freq) {
+        
+        String text = text1.toUpperCase(); 
+
         for (int i = 0; i < text.length(); i++) {
 
             if (text.charAt(i) == 'A') {
@@ -222,11 +212,10 @@ public class CypherProgram {
             if (text.charAt(i) == 'Z') {
                 freq[25] += 1;
             }
-
         }
     }
 
-    public static void guessHelper(char find, char swtch, char[] temp, char[] tble2) {
+    public void guessHelper(char find, char swtch, char[] temp, char[] tble2) {
 
         int x = 0, y = 0;
         char org = ' ';
@@ -245,7 +234,7 @@ public class CypherProgram {
         temp[y] = org;
     }
 
-    public static void finalCipher(char[] str, char[] temp, int tLength) {
+    public char[] finalCipher(char[] str, char[] temp, int tLength) {
 
         for (int i = 0; i < tLength; i++) {
 
@@ -304,6 +293,7 @@ public class CypherProgram {
             }
 
         }
+        return str;
     }
 
     public static void detectDup(int arr[]) {
@@ -321,17 +311,26 @@ public class CypherProgram {
 
     }
 
-    public static char[] matchAlpha(char[] f1, char[] tbl2, char[] tbl) {
+    public static char[] matchAlpha(char[] f1, char[] tble2, char [] tble) {
 
         char AS[] = new char[26];
+        
+        for(int i = 0; i < f1.length; i++)System.out.print(f1[i]); 
+        System.out.println();
+        for(int i = 0; i < tble2.length; i++)System.out.print(tble2[i]); 
+        System.out.println();
+        for(int i = 0; i < tble.length; i++)System.out.print(tble[i]); 
+        System.out.println();
+        
+        System.out.println(tble.length); 
 
         for (int i = 0; i < f1.length; i++) {
 
             for (int j = 0; j < 26; j++) {
 
-                if (tbl2[i] == f1[j]) {
+                if (tble2[i] == f1[j]) {
 
-                    AS[i] = tbl[j];
+                    AS[i] = tble[j];
                 }
             }
 
